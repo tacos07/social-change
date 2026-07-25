@@ -3,17 +3,17 @@
 # The Signal link and all credentials live in environment variables only.
 # ---------------------------------------------------------------------------
 
-app_name: "Protium Group Access"
+app_name: "Social Change Group Access"
 
 # Public repo URL shown at the top of the site (transparency / audit).
 # Leave blank to hide the link. Blank on purpose: the repo is private, so a
 # link here would only lead visitors to a 404.
-repo_url: ""
+repo_url: "https://github.com/tacos07/social-change"
 
 # Only these email domains may request access. Edit this list freely.
 # Just add lines under allowed_domains.
 allowed_domains:
-  - protium.co.in
+  - iitbombay.org
   # - anotherdomain.com
 
 # One-time code lifetime, in seconds (default 10 minutes).
