@@ -1,0 +1,324 @@
+/* ===========================================================================
+   signal-join-gate — a private vestibule. Committed dark, indigo ink + ember.
+   Pure CSS (the CSP blocks all JavaScript). Dark-only by design.
+   =========================================================================== */
+
+:root {
+  /* Surfaces — deep indigo ink, not black-gray */
+  --bg:          oklch(0.16 0.032 275);
+  --bg-deep:     oklch(0.12 0.028 275);
+  --surface:     oklch(0.21 0.036 275);
+  --surface-hi:  oklch(0.26 0.040 275);
+  --border:      oklch(0.34 0.040 278 / 0.7);
+  --border-soft: oklch(0.34 0.040 278 / 0.35);
+
+  /* Ink */
+  --ink:    oklch(0.97 0.010 275);
+  --muted:  oklch(0.76 0.022 278);
+  --faint:  oklch(0.64 0.024 278);
+
+  /* Ember (warm trust point) */
+  --ember:      oklch(0.80 0.150 62);
+  --ember-deep: oklch(0.72 0.165 52);
+  --on-ember:   oklch(0.21 0.040 60);
+
+  /* Azure (cool focus / links) */
+  --azure: oklch(0.82 0.110 232);
+
+  --danger: oklch(0.74 0.150 22);
+
+  --radius:    18px;
+  --radius-sm: 11px;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1); /* ease-out-expo-ish */
+  --shadow: 0 24px 60px -20px oklch(0.08 0.03 275 / 0.7),
+            0 4px 14px -6px oklch(0.05 0.02 275 / 0.6);
+
+  --z-ambient: 0;
+  --z-content: 1;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(120% 80% at 50% -10%, oklch(0.24 0.05 288) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* --- Ambient lamp behind the panel --------------------------------------- */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-ambient);
+  pointer-events: none;
+  background:
+    radial-gradient(38% 34% at 50% 46%, oklch(0.82 0.15 62 / 0.16) 0%, transparent 70%),
+    radial-gradient(30% 40% at 78% 22%, oklch(0.7 0.12 300 / 0.12) 0%, transparent 70%);
+  animation: breathe 11s var(--ease) infinite alternate;
+}
+@keyframes breathe {
+  from { opacity: 0.7; transform: scale(1); }
+  to   { opacity: 1;   transform: scale(1.06); }
+}
+
+/* --- Top bar -------------------------------------------------------------- */
+.topbar {
+  position: relative;
+  z-index: var(--z-content);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem clamp(1.1rem, 4vw, 2.2rem);
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 600;
+  font-size: 0.94rem;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.brand__mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: linear-gradient(145deg, var(--ember) 0%, var(--ember-deep) 100%);
+  box-shadow: 0 0 18px -3px oklch(0.8 0.15 62 / 0.6), inset 0 1px 0 oklch(0.95 0.05 80 / 0.5);
+}
+.repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, Consolas, monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0.42rem 0.75rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: oklch(0.21 0.036 275 / 0.5);
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease), background 0.25s var(--ease);
+}
+.repo:hover { color: var(--ink); border-color: var(--border); background: var(--surface); }
+.repo__dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--azure);
+  box-shadow: 0 0 8px 0 var(--azure);
+}
+
+/* --- Stage + panel -------------------------------------------------------- */
+.stage {
+  position: relative;
+  z-index: var(--z-content);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2rem clamp(1.1rem, 4vw, 2rem) 3rem;
+}
+
+.panel {
+  width: min(430px, 100%);
+  background:
+    linear-gradient(180deg, var(--surface) 0%, oklch(0.19 0.034 275) 100%);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: clamp(1.6rem, 5vw, 2.4rem);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  animation: rise 0.6s var(--ease) both;
+}
+/* thin light key-line along the top edge — the panel catches the lamp */
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(0.95 0.03 80 / 0.35), transparent);
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.panel__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.4rem;
+  font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.pulse {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ember);
+  box-shadow: 0 0 0 0 oklch(0.8 0.15 62 / 0.6);
+  animation: pulse 2.4s var(--ease) infinite;
+}
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 oklch(0.8 0.15 62 / 0.55); }
+  70%  { box-shadow: 0 0 0 9px oklch(0.8 0.15 62 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.8 0.15 62 / 0); }
+}
+
+/* --- Type ----------------------------------------------------------------- */
+h1 {
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.55rem, 5.5vw, 2rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 640;
+  text-wrap: balance;
+}
+.sub {
+  margin: 0 0 1.6rem;
+  color: var(--muted);
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+.hl { color: var(--ink); font-weight: 600; }
+
+/* --- Form ----------------------------------------------------------------- */
+label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--faint);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.01em;
+}
+input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.25rem;
+  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
+}
+input::placeholder { color: oklch(0.55 0.02 278); }
+input:focus {
+  outline: none;
+  border-color: var(--azure);
+  background: oklch(0.14 0.03 275);
+  box-shadow: 0 0 0 3px oklch(0.82 0.11 232 / 0.18);
+}
+
+/* the code field: a vault keypad */
+#otp {
+  font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, Consolas, monospace;
+  font-size: 1.6rem;
+  text-align: center;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em; /* balance the trailing letter-spacing */
+  padding-block: 0.95rem;
+  caret-color: var(--ember);
+}
+#otp::placeholder { letter-spacing: 0.35em; color: oklch(0.42 0.02 278); }
+
+/* --- Buttons -------------------------------------------------------------- */
+button,
+.cta {
+  --lift: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 640;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  color: var(--on-ember);
+  background: linear-gradient(160deg, var(--ember) 0%, var(--ember-deep) 100%);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  transform: translateY(var(--lift));
+  box-shadow: 0 8px 22px -10px oklch(0.72 0.165 52 / 0.8);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), filter 0.25s var(--ease);
+}
+button:hover,
+.cta:hover {
+  --lift: -2px;
+  filter: brightness(1.05) saturate(1.05);
+  box-shadow: 0 14px 30px -12px oklch(0.72 0.165 52 / 0.9);
+}
+button:active,
+.cta:active { --lift: 0px; filter: brightness(0.98); }
+button:focus-visible,
+.cta:focus-visible {
+  outline: 2px solid var(--azure);
+  outline-offset: 3px;
+}
+.cta__arrow { transition: transform 0.3s var(--ease); }
+.cta:hover .cta__arrow { transform: translateX(3px); }
+
+/* --- Feedback ------------------------------------------------------------- */
+.err {
+  color: oklch(0.86 0.09 25);
+  background: oklch(0.28 0.09 22 / 0.4);
+  border: 1px solid oklch(0.5 0.12 22 / 0.45);
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-sm);
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+  animation: rise 0.35s var(--ease) both;
+}
+.hint {
+  color: var(--faint);
+  font-size: 0.84rem;
+  margin: 0.85rem 0 0;
+}
+.hint a {
+  color: var(--azure);
+  text-decoration: none;
+  border-bottom: 1px solid oklch(0.82 0.11 232 / 0.3);
+  transition: border-color 0.25s var(--ease);
+}
+.hint a:hover { border-color: var(--azure); }
+
+.assurance {
+  margin: 0;
+  color: var(--faint);
+  font-size: 0.8rem;
+  text-align: center;
+  max-width: 42ch;
+}
+
+/* --- Motion off ----------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

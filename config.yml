@@ -1,0 +1,29 @@
+# ---------------------------------------------------------------------------
+# Human-editable settings. SAFE TO COMMIT — this file contains NO secrets.
+# The Signal link and all credentials live in environment variables only.
+# ---------------------------------------------------------------------------
+
+app_name: "Protium Group Access"
+
+# Public repo URL shown at the top of the site (transparency / audit).
+# Leave blank to hide the link.
+repo_url: "https://github.com/<your-user>/signal-join-gate"
+
+# Only these email domains may request access. Edit this list freely.
+# Just add lines under allowed_domains.
+allowed_domains:
+  - protium.co.in
+  # - anotherdomain.com
+
+# One-time code lifetime, in seconds (default 10 minutes).
+otp_ttl_seconds: 600
+
+# How long the Signal redirect stays valid after a successful verification,
+# in seconds (default 3 minutes). This is your "short link expiry".
+redirect_ttl_seconds: 180
+
+# Maximum wrong code attempts before the code is voided (you asked for 3).
+max_attempts: 3
+
+# Anti-abuse: maximum OTP emails allowed per IP address per 15 minutes.
+otp_requests_per_15min: 5
