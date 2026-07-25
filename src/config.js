@@ -11,12 +11,25 @@ const root = path.resolve(__dirname, '..');
 // --- Non-secret settings (config.yml) --------------------------------------
 const raw = yaml.load(fs.readFileSync(path.join(root, 'config.yml'), 'utf8')) || {};
 
+// An allowed_domains entry is either a bare domain string or a
+// "{ domain, name }" pair. The pair is preferred: on screen, "IIT Kharagpur"
+// next to "iitkgp.ac.in" is far harder to misread than "iitkgp" vs "iitk"
+// alone. Bare strings still work, so older config files keep loading.
+const institutes = (Array.isArray(raw.allowed_domains) ? raw.allowed_domains : [])
+  .map((entry) => {
+    const isPair = entry !== null && typeof entry === 'object';
+    const domain = String(isPair ? entry.domain ?? '' : entry).trim().toLowerCase();
+    if (!domain) return null;
+    const name = String((isPair ? entry.name : '') || domain).trim();
+    return { domain, name };
+  })
+  .filter(Boolean);
+
 export const config = {
   appName: raw.app_name || 'Private Group Access',
   repoUrl: raw.repo_url || '',
-  allowedDomains: (raw.allowed_domains || [])
-    .map((d) => String(d).trim().toLowerCase())
-    .filter(Boolean),
+  institutes,
+  allowedDomains: institutes.map((i) => i.domain),
   otpTtlSeconds: Number(raw.otp_ttl_seconds || 600),
   redirectTtlSeconds: Number(raw.redirect_ttl_seconds || 180),
   maxAttempts: Number(raw.max_attempts || 3),

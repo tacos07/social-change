@@ -1,324 +1,475 @@
 /* ===========================================================================
-   signal-join-gate — a private vestibule. Committed dark, indigo ink + ember.
-   Pure CSS (the CSP blocks all JavaScript). Dark-only by design.
+   signal-join-gate — a door, not a landing page.
+   Near-black slate, hairline rules, one accent. No card, no chrome.
+   Pure CSS: the CSP blocks every script, so <details> and :focus-visible do
+   all the interaction work. Dark-only by design (see PRODUCT.md).
    =========================================================================== */
 
+/* --- Self-hosted type -----------------------------------------------------
+   Served from our own origin, so no request ever reaches Google. On a page
+   whose whole promise is "we store nothing", a third-party font call would
+   quietly hand every visitor's IP to someone else.
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Inter var";
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono var";
+  src: url("/fonts/jetbrainsmono-latin.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
-  /* Surfaces — deep indigo ink, not black-gray */
-  --bg:          oklch(0.16 0.032 275);
-  --bg-deep:     oklch(0.12 0.028 275);
-  --surface:     oklch(0.21 0.036 275);
-  --surface-hi:  oklch(0.26 0.040 275);
-  --border:      oklch(0.34 0.040 278 / 0.7);
-  --border-soft: oklch(0.34 0.040 278 / 0.35);
+  /* Surfaces — neutral slate, a whisper of violet so it isn't a dead gray */
+  --bg:      oklch(0.145 0.006 285);
+  --field:   oklch(0.188 0.007 285);
+  --raised:  oklch(0.215 0.008 285);
 
-  /* Ink */
-  --ink:    oklch(0.97 0.010 275);
-  --muted:  oklch(0.76 0.022 278);
-  --faint:  oklch(0.64 0.024 278);
+  /* Hairlines */
+  --line:      oklch(0.285 0.008 285);
+  --line-soft: oklch(0.245 0.007 285);
 
-  /* Ember (warm trust point) */
-  --ember:      oklch(0.80 0.150 62);
-  --ember-deep: oklch(0.72 0.165 52);
-  --on-ember:   oklch(0.21 0.040 60);
+  /* Ink — every value below is >=4.5:1 on --bg and on --field */
+  --ink:    oklch(0.965 0.003 285);
+  --muted:  oklch(0.735 0.008 285);
+  --faint:  oklch(0.620 0.008 285);
 
-  /* Azure (cool focus / links) */
-  --azure: oklch(0.82 0.110 232);
+  /* Accent — primary action, focus, current step. Nothing decorative. */
+  --accent:      oklch(0.600 0.200 285);
+  --accent-hi:   oklch(0.660 0.190 285);
+  --accent-ink:  oklch(0.800 0.120 285); /* accent as text, on dark */
+  --on-accent:   oklch(0.995 0 0);
+  --accent-ring: oklch(0.660 0.190 285 / 0.35);
 
-  --danger: oklch(0.74 0.150 22);
+  --danger:     oklch(0.760 0.150 25);
+  --danger-bg:  oklch(0.300 0.075 25 / 0.35);
+  --danger-line:oklch(0.480 0.110 25 / 0.5);
 
-  --radius:    18px;
-  --radius-sm: 11px;
+  --sans: "Inter var", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "JetBrains Mono var", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
 
-  --ease: cubic-bezier(0.16, 1, 0.3, 1); /* ease-out-expo-ish */
-  --shadow: 0 24px 60px -20px oklch(0.08 0.03 275 / 0.7),
-            0 4px 14px -6px oklch(0.05 0.02 275 / 0.6);
+  --r:    10px;
+  --r-sm: 7px;
 
-  --z-ambient: 0;
+  /* 150–250ms: state feedback, never choreography */
+  --t:    170ms;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --z-base: 0;
   --z-content: 1;
 }
 
 * { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Anchor the column slightly above centre; a dead-centre form sits low. */
+  scrollbar-gutter: stable;
+}
 
 body {
   margin: 0;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(120% 80% at 50% -10%, oklch(0.24 0.05 288) 0%, transparent 60%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
-  background-attachment: fixed;
+  background: var(--bg);
   color: var(--ink);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--sans);
   font-size: 16px;
+  font-feature-settings: "cv05" 1, "ss03" 1; /* single-storey l, curved r */
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* --- Ambient lamp behind the panel --------------------------------------- */
-.ambient {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-ambient);
-  pointer-events: none;
-  background:
-    radial-gradient(38% 34% at 50% 46%, oklch(0.82 0.15 62 / 0.16) 0%, transparent 70%),
-    radial-gradient(30% 40% at 78% 22%, oklch(0.7 0.12 300 / 0.12) 0%, transparent 70%);
-  animation: breathe 11s var(--ease) infinite alternate;
-}
-@keyframes breathe {
-  from { opacity: 0.7; transform: scale(1); }
-  to   { opacity: 1;   transform: scale(1.06); }
-}
-
-/* --- Top bar -------------------------------------------------------------- */
+/* --- Top bar --------------------------------------------------------------
+   Two marks and nothing else. It reads as a header only because of its position.
+   -------------------------------------------------------------------------- */
 .topbar {
-  position: relative;
-  z-index: var(--z-content);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.15rem clamp(1.1rem, 4vw, 2.2rem);
+  padding: 1.25rem clamp(1.15rem, 5vw, 2rem);
 }
+
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  font-weight: 600;
-  font-size: 0.94rem;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-}
-.brand__mark {
-  width: 22px;
-  height: 22px;
-  border-radius: 7px;
-  background: linear-gradient(145deg, var(--ember) 0%, var(--ember-deep) 100%);
-  box-shadow: 0 0 18px -3px oklch(0.8 0.15 62 / 0.6), inset 0 1px 0 oklch(0.95 0.05 80 / 0.5);
-}
-.repo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, Consolas, monospace;
-  font-size: 0.76rem;
-  letter-spacing: 0.02em;
+  gap: 0.55rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.008em;
   color: var(--muted);
-  text-decoration: none;
-  padding: 0.42rem 0.75rem;
-  border: 1px solid var(--border-soft);
-  border-radius: 999px;
-  background: oklch(0.21 0.036 275 / 0.5);
-  transition: color 0.25s var(--ease), border-color 0.25s var(--ease), background 0.25s var(--ease);
 }
-.repo:hover { color: var(--ink); border-color: var(--border); background: var(--surface); }
-.repo__dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--azure);
-  box-shadow: 0 0 8px 0 var(--azure);
+/* The mark is black line art on transparent, so on a near-black page it has to
+   be flipped to white. invert() leaves the alpha channel alone, so the artwork
+   stays cleanly cut out. */
+.brand__logo {
+  width: 34px;
+  height: auto;
+  flex: none;
+  filter: invert(1);
 }
 
-/* --- Stage + panel -------------------------------------------------------- */
+.ghlink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  color: var(--faint);
+  transition: color var(--t) var(--ease), background var(--t) var(--ease);
+}
+.ghlink svg { width: 17px; height: 17px; display: block; }
+.ghlink:hover { color: var(--ink); background: var(--field); }
+.ghlink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  color: var(--ink);
+}
+
+/* --- The column -----------------------------------------------------------
+   No panel. The content is the page; whitespace does the framing.
+   -------------------------------------------------------------------------- */
 .stage {
-  position: relative;
-  z-index: var(--z-content);
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  padding: 2rem clamp(1.1rem, 4vw, 2rem) 3rem;
+  padding: 1.5rem clamp(1.15rem, 5vw, 2rem) clamp(3rem, 12vh, 6rem);
 }
 
-.panel {
-  width: min(430px, 100%);
-  background:
-    linear-gradient(180deg, var(--surface) 0%, oklch(0.19 0.034 275) 100%);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius);
-  padding: clamp(1.6rem, 5vw, 2.4rem);
-  box-shadow: var(--shadow);
-  position: relative;
-  overflow: hidden;
-  animation: rise 0.6s var(--ease) both;
-}
-/* thin light key-line along the top edge — the panel catches the lamp */
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, oklch(0.95 0.03 80 / 0.35), transparent);
-}
-@keyframes rise {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+.column {
+  width: min(400px, 100%);
 }
 
-.panel__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 1.4rem;
-  font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, Consolas, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
+/* Where you are, stated rather than illustrated. */
+.step {
+  margin: 0 0 1.5rem;
+  font-family: var(--mono);
+  font-size: 0.71rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--faint);
 }
-.pulse {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--ember);
-  box-shadow: 0 0 0 0 oklch(0.8 0.15 62 / 0.6);
-  animation: pulse 2.4s var(--ease) infinite;
-}
-@keyframes pulse {
-  0%   { box-shadow: 0 0 0 0 oklch(0.8 0.15 62 / 0.55); }
-  70%  { box-shadow: 0 0 0 9px oklch(0.8 0.15 62 / 0); }
-  100% { box-shadow: 0 0 0 0 oklch(0.8 0.15 62 / 0); }
-}
+.step__now { color: var(--accent-ink); }
 
-/* --- Type ----------------------------------------------------------------- */
 h1 {
-  margin: 0 0 0.6rem;
-  font-size: clamp(1.55rem, 5.5vw, 2rem);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  font-weight: 640;
+  margin: 0 0 0.55rem;
+  font-size: 1.6rem;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 600;
   text-wrap: balance;
 }
+
 .sub {
-  margin: 0 0 1.6rem;
+  margin: 0 0 1.75rem;
   color: var(--muted);
-  max-width: 62ch;
+  font-size: 0.94rem;
+  max-width: 46ch;
   text-wrap: pretty;
 }
-.hl { color: var(--ink); font-weight: 600; }
+.hl {
+  color: var(--ink);
+  font-weight: 500;
+}
+.sub .mono {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  color: var(--ink);
+}
 
-/* --- Form ----------------------------------------------------------------- */
+/* --- Roster (collapsed institute list) ------------------------------------
+   Native <details>. The list will outgrow a phone screen once more institutes
+   land, so it ships closed and scrolls internally rather than pushing the form
+   below the fold.
+   -------------------------------------------------------------------------- */
+.roster {
+  margin: 0 0 1.75rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  background: oklch(0.168 0.006 285);
+}
+
+.roster > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.845rem;
+  color: var(--muted);
+  border-radius: inherit;
+  transition: color var(--t) var(--ease), background var(--t) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.roster > summary::-webkit-details-marker { display: none; }
+.roster > summary:hover { color: var(--ink); background: var(--field); }
+.roster > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  color: var(--ink);
+}
+
+/* Chevron drawn from a rotated border corner: no icon font, no inline SVG. */
+.roster__chev {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  margin-left: 0.15rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--t) var(--ease);
+}
+.roster[open] .roster__chev { transform: rotate(45deg); }
+
+.roster__count { flex: 1; }
+.roster__toggle {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+}
+.roster[open] .roster__toggle::after { content: "hide"; }
+.roster:not([open]) .roster__toggle::after { content: "show"; }
+
+.roster__list {
+  margin: 0;
+  padding: 0.15rem 0.85rem 0.7rem;
+  list-style: none;
+  max-height: 13.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 0.6rem;
+}
+.roster__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.32rem 0;
+  font-size: 0.845rem;
+}
+.roster__row + .roster__row { border-top: 1px solid oklch(0.245 0.007 285 / 0.6); }
+.roster__name {
+  color: var(--ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.roster__domain {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--faint);
+  white-space: nowrap;
+}
+.roster__note {
+  margin: 0.7rem 0 0;
+  font-size: 0.78rem;
+  color: var(--faint);
+}
+
+/* --- Form ------------------------------------------------------------------ */
 label {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: var(--faint);
-  margin-bottom: 0.5rem;
-  letter-spacing: 0.01em;
+  margin-bottom: 0.45rem;
 }
+
 input {
   width: 100%;
-  padding: 0.85rem 1rem;
+  padding: 0.72rem 0.85rem;
   font-size: 1rem;
   font-family: inherit;
   color: var(--ink);
-  background: var(--bg-deep);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  margin-bottom: 1.25rem;
-  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  margin-bottom: 1rem;
+  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
 }
-input::placeholder { color: oklch(0.55 0.02 278); }
+input::placeholder { color: var(--faint); }
+input:hover { border-color: oklch(0.34 0.010 285); }
 input:focus {
   outline: none;
-  border-color: var(--azure);
-  background: oklch(0.14 0.03 275);
-  box-shadow: 0 0 0 3px oklch(0.82 0.11 232 / 0.18);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
-/* the code field: a vault keypad */
+/* The code field is the one place density is wrong: make it unmissable. */
 #otp {
-  font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, Consolas, monospace;
-  font-size: 1.6rem;
+  font-family: var(--mono);
+  font-size: 1.45rem;
+  font-weight: 500;
   text-align: center;
-  letter-spacing: 0.5em;
-  text-indent: 0.5em; /* balance the trailing letter-spacing */
-  padding-block: 0.95rem;
-  caret-color: var(--ember);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em; /* cancel the trailing gap so digits sit centred */
+  padding-block: 0.7rem;
+  caret-color: var(--accent-ink);
 }
-#otp::placeholder { letter-spacing: 0.35em; color: oklch(0.42 0.02 278); }
+#otp::placeholder { color: oklch(0.42 0.008 285); letter-spacing: 0.3em; }
 
-/* --- Buttons -------------------------------------------------------------- */
 button,
 .cta {
-  --lift: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   width: 100%;
-  padding: 0.9rem 1.1rem;
-  font-size: 1rem;
-  font-weight: 640;
+  padding: 0.72rem 1rem;
   font-family: inherit;
-  letter-spacing: -0.01em;
-  color: var(--on-ember);
-  background: linear-gradient(160deg, var(--ember) 0%, var(--ember-deep) 100%);
-  border: none;
-  border-radius: var(--radius-sm);
+  font-size: 0.94rem;
+  font-weight: 550;
+  letter-spacing: -0.005em;
+  color: var(--on-accent);
+  background: var(--accent);
+  border: 1px solid oklch(0.66 0.19 285 / 0.6);
+  border-radius: var(--r-sm);
   cursor: pointer;
   text-decoration: none;
-  transform: translateY(var(--lift));
-  box-shadow: 0 8px 22px -10px oklch(0.72 0.165 52 / 0.8);
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), filter 0.25s var(--ease);
+  transition: background var(--t) var(--ease), border-color var(--t) var(--ease);
 }
 button:hover,
-.cta:hover {
-  --lift: -2px;
-  filter: brightness(1.05) saturate(1.05);
-  box-shadow: 0 14px 30px -12px oklch(0.72 0.165 52 / 0.9);
-}
+.cta:hover { background: var(--accent-hi); border-color: var(--accent-hi); }
 button:active,
-.cta:active { --lift: 0px; filter: brightness(0.98); }
+.cta:active { background: oklch(0.555 0.195 285); }
 button:focus-visible,
 .cta:focus-visible {
-  outline: 2px solid var(--azure);
-  outline-offset: 3px;
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
 }
-.cta__arrow { transition: transform 0.3s var(--ease); }
-.cta:hover .cta__arrow { transform: translateX(3px); }
 
-/* --- Feedback ------------------------------------------------------------- */
-.err {
-  color: oklch(0.86 0.09 25);
-  background: oklch(0.28 0.09 22 / 0.4);
-  border: 1px solid oklch(0.5 0.12 22 / 0.45);
-  padding: 0.7rem 0.9rem;
-  border-radius: var(--radius-sm);
-  margin: 0 0 1.25rem;
-  font-size: 0.9rem;
-  animation: rise 0.35s var(--ease) both;
+/* --- Readiness sequence (success screen) ----------------------------------
+   Numbered because it genuinely is an order: the invite has nowhere to hand
+   you off to if Signal isn't installed and signed in first.
+   -------------------------------------------------------------------------- */
+.ready {
+  counter-reset: ready;
+  margin: 0 0 1.5rem;
+  padding: 0.85rem 0.95rem;
+  list-style: none;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  background: oklch(0.168 0.006 285);
 }
+.ready li {
+  counter-increment: ready;
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.ready li + li { margin-top: 0.5rem; }
+.ready li::before {
+  content: counter(ready);
+  flex: none;
+  width: 1.3rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--accent-ink);
+}
+
+/* Desktop-only guidance, no script: laptops are where people get stranded,
+   because the invite needs a linked Signal Desktop to do anything. */
+.only-wide { display: none; }
+@media (min-width: 700px) {
+  .only-wide { display: block; }
+}
+
+/* --- Feedback -------------------------------------------------------------- */
+.err {
+  display: flex;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.87rem;
+  color: oklch(0.88 0.075 25);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-line);
+  border-radius: var(--r-sm);
+  animation: settle 160ms var(--ease) both;
+}
+/* Not colour alone: the glyph carries the meaning for colour-blind users. */
+.err::before {
+  content: "!";
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.16rem;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--bg);
+  background: var(--danger);
+  border-radius: 50%;
+}
+@keyframes settle {
+  from { opacity: 0; transform: translateY(-3px); }
+  to   { opacity: 1; transform: none; }
+}
+
 .hint {
+  margin: 0.9rem 0 0;
+  font-size: 0.82rem;
   color: var(--faint);
-  font-size: 0.84rem;
-  margin: 0.85rem 0 0;
 }
 .hint a {
-  color: var(--azure);
+  color: var(--accent-ink);
   text-decoration: none;
-  border-bottom: 1px solid oklch(0.82 0.11 232 / 0.3);
-  transition: border-color 0.25s var(--ease);
+  border-bottom: 1px solid oklch(0.80 0.12 285 / 0.3);
+  transition: border-color var(--t) var(--ease);
 }
-.hint a:hover { border-color: var(--azure); }
+.hint a:hover { border-color: var(--accent-ink); }
+.hint a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
+.attempts {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* --- Foot ------------------------------------------------------------------ */
 .assurance {
-  margin: 0;
+  width: min(400px, 100%);
+  margin: 2.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.78rem;
+  line-height: 1.5;
   color: var(--faint);
-  font-size: 0.8rem;
-  text-align: center;
-  max-width: 42ch;
 }
 
-/* --- Motion off ----------------------------------------------------------- */
+/* --- Motion off ------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.001ms !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-duration: 0.01ms !important;
   }
+  .err { animation: none; }
 }

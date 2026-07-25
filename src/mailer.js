@@ -31,18 +31,13 @@ export async function sendOtp(email, code) {
     return;
   }
 
-  try {
-    await transporter.sendMail({
-      from: secrets.mailFrom,
-      to: email,
-      subject: `${config.appName} — your one-time code`,
-      text:
-        `Your verification code is: ${code}\n\n` +
-        `It expires in ${minutes} minute(s). Enter it on the page you already have open.\n\n` +
-        `If you did not request this, you can safely ignore this email.`,
-    });
-  } catch (err) {
-    console.error('mail send failed', err);
-    throw err;
-  }
+  await transporter.sendMail({
+    from: secrets.mailFrom,
+    to: email,
+    subject: `${config.appName} — your one-time code`,
+    text:
+      `Your verification code is: ${code}\n\n` +
+      `It expires in ${minutes} minute(s). Enter it on the page you already have open.\n\n` +
+      `If you did not request this, you can safely ignore this email.`,
+  });
 }

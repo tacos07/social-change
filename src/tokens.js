@@ -30,6 +30,9 @@ export function verify(token) {
   } catch {
     return null;
   }
-  if (typeof payload.exp === 'number' && Date.now() > payload.exp) return null;
+  // Expiry is mandatory, not optional. A signed token that happened to be
+  // minted without an "exp" would otherwise be valid forever; refusing it here
+  // means a future caller cannot accidentally create an immortal cookie.
+  if (typeof payload.exp !== 'number' || Date.now() > payload.exp) return null;
   return payload;
 }

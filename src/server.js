@@ -69,11 +69,20 @@ const otpLimiter = rateLimit({
     res.status(429).send(errorPage('Too many requests. Please wait a few minutes and try again.')),
 });
 
-// Defense-in-depth: the 3-attempt cookie already bounds guessing per code; this
-// caps raw verification volume from a single IP so the endpoint can't be flooded.
+// This limiter, NOT the 3-attempt counter, is the real bound on code guessing.
+//
+// The attempt count lives in the signed "chal" cookie, and a signed cookie the
+// client already holds stays valid: an attacker can simply re-send their
+// original att=0 cookie before every guess and the counter never advances.
+// Verified by hand — see the audit note in README. Nothing stateless can stop
+// that, because "this token was already spent" is server state by definition.
+//
+// So the ceiling that actually matters is requests-per-IP against a 10-minute,
+// one-in-a-million code. 10 is comfortably above the 3 tries an honest person
+// needs and far below anything useful for brute force.
 const verifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) =>
@@ -92,7 +101,7 @@ app.post('/request-otp', otpLimiter, async (req, res) => {
   if (!isValidEmail(email) || !isAllowedDomain(email)) {
     return res
       .status(400)
-      .send(emailPage({ error: 'That email is not eligible. Use an approved work email.' }));
+      .send(emailPage({ error: 'That address is not eligible. Use an email at one of the approved domains.' }));
   }
 
   const code = generateOtp();

@@ -3,18 +3,29 @@
 # The Signal link and all credentials live in environment variables only.
 # ---------------------------------------------------------------------------
 
-app_name: "Social Change Group Access"
+app_name: "Social Change"
 
-# Public repo URL shown at the top of the site (transparency / audit).
-# Leave blank to hide the link. Blank on purpose: the repo is private, so a
-# link here would only lead visitors to a 404.
+# Public repo URL, shown as a GitHub mark in the top-right corner. Anyone can
+# read exactly what this site does with their address. Leave blank to hide it —
+# do that if the repo is private, or the mark just leads visitors to a 404.
 repo_url: "https://github.com/tacos07/social-change"
 
-# Only these email domains may request access. Edit this list freely.
-# Just add lines under allowed_domains.
+# Only these email domains may request access.
+#
+# Each entry can be:
+#   - iitb.ac.in                      (just the domain)
+#   - domain: iitb.ac.in              (domain + the name shown on screen)
+#     name: IIT Bombay
+#
+# Prefer the second form. The site lists these in a collapsed panel, and a
+# reader can tell "IIT Kanpur" from "IIT Kharagpur" far quicker than they can
+# tell iitk.ac.in from iitkgp.ac.in. The name is free text, so this list is not
+# limited to universities: a company, a society, or a chapter works the same
+# way. Add entries by adding lines; the panel collapses and scrolls on its own,
+# so it can grow without pushing the form off the screen.
 allowed_domains:
-  - iitbombay.org
-  # - anotherdomain.com
+  - domain: iitbombay.org
+    name: IIT Bombay Alumni Association
 
 # One-time code lifetime, in seconds (default 10 minutes).
 otp_ttl_seconds: 600
