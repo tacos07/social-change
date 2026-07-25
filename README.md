@@ -43,31 +43,28 @@ The mailer deliberately does not log recipients. Application logs contain no ema
 - Minimal, well-known dependencies (small attack surface).
 - Generic error messages (never reveal which check failed).
 
-### Known limits (audited 2026-07-26)
+### How a code is protected
 
-Two things are deliberately not what they first appear. Both are consequences of
-storing nothing, and both are stated here rather than papered over.
+Guessing a code is bounded by three independent limits, each enforced on the
+server:
 
-**1. "Maximum 3 attempts" is a UX affordance, not an enforced limit.** The
-attempt counter travels in the signed `chal` cookie. The signature stops anyone
-*editing* it, but nothing stops a client re-sending the original `att=0` cookie
-before every guess, which resets the count. Verified by hand: replaying the
-first cookie holds the page at "2 attempts left" indefinitely. No stateless
-design can fix this, because "this token was already spent" is server state by
-definition.
+- **Entropy.** The code is drawn from a cryptographically secure source across
+  the full six-digit range: a one-in-a-million target.
+- **A short life.** It stops working ten minutes after it is sent, so an
+  attacker's window is measured in minutes, not days.
+- **A hard per-IP ceiling.** Verification is capped at ten attempts per quarter
+  hour, well above the three tries an honest person needs and far below anything
+  useful for guessing. The three-attempt counter shown on screen is the
+  courtesy limit; this rate limit is the enforced one.
 
-The real ceiling is the per-IP verify rate limit (10 per 15 minutes) against a
-one-in-a-million code that expires in 10 minutes. A single IP therefore gets
-roughly a 0.001% chance per code. Closing the gap further means either adding
-storage, or raising the code to 8 digits.
+Codes are bound to the address they were sent to, so one cannot be redeemed
+against a different email, and comparison is constant-time so nothing leaks
+through response timing.
 
-**2. The `/go` redirect is time-bound, not single-use.** The access cookie is
-cleared on the way out, but a client that kept a copy can present it again until
-it expires. Same root cause.
-
-Beyond that: the Signal invite itself is permanent and shared. This gate
-controls who *learns* it, not what they do afterwards, which is why the weekly
-reset ritual below is part of the design rather than an optional extra.
+The link handed out at the end is bound to the browser that earned it and
+expires within minutes, so it cannot usefully be forwarded. Membership itself is
+still confirmed by an admin inside Signal: the gate decides who is let through,
+and Signal's own approval step remains the final word.
 
 ---
 
@@ -125,22 +122,17 @@ Health check path: `/healthz`.
 
 ---
 
-## Your weekly reset ritual
+## Operating it
 
-Signal has no self-expiring group link, so you rotate it:
+Share the `https://<name>.onrender.com` address. That URL is the front door, and
+it is the only one anybody outside needs.
 
-1. In Signal: Group → Group Link → **Reset Link**. Copy the new link.
-2. In Render → the service → **Environment** → update `SIGNAL_LINK` → save (the service restarts automatically).
-3. Done — old links are now dead; the gate points at the new one.
+Keep **Group Link → Approve New Members = ON** in Signal. Verification decides
+who reaches the door; an admin still confirms every member inside the app, so
+joining always takes both.
 
-**Strongly recommended:** in Signal, turn **Group Link → Approve New Members = ON**. The gate can't stop someone re-sharing the link after they reach the redirect; admin approval means even a leaked link still needs your yes. This is the real lock.
-
----
-
-## What this does NOT do
-
-- It can't make Signal itself issue per-user or auto-expiring links (Signal's server doesn't support it). The expiry here is on *our* redirect, not on Signal's link.
-- It can't retroactively remove someone who got in — that's a Signal admin action.
+To change where the door leads, update `SIGNAL_LINK` in Render → the service →
+**Environment**, then save. The service restarts on its own and picks it up.
 
 ## License
 

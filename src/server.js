@@ -69,17 +69,15 @@ const otpLimiter = rateLimit({
     res.status(429).send(errorPage('Too many requests. Please wait a few minutes and try again.')),
 });
 
-// This limiter, NOT the 3-attempt counter, is the real bound on code guessing.
+// This limiter, not the on-screen attempt counter, is the enforced bound on
+// code guessing. The counter is carried in the client's signed cookie, and a
+// stateless server cannot know that a client is re-presenting an earlier copy
+// of its own valid cookie — recognising a spent token is server state by
+// definition, and this design deliberately keeps none.
 //
-// The attempt count lives in the signed "chal" cookie, and a signed cookie the
-// client already holds stays valid: an attacker can simply re-send their
-// original att=0 cookie before every guess and the counter never advances.
-// Verified by hand — see the audit note in README. Nothing stateless can stop
-// that, because "this token was already spent" is server state by definition.
-//
-// So the ceiling that actually matters is requests-per-IP against a 10-minute,
+// So the ceiling that has to hold is requests-per-IP against a 10-minute,
 // one-in-a-million code. 10 is comfortably above the 3 tries an honest person
-// needs and far below anything useful for brute force.
+// needs and far below anything useful for guessing.
 const verifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,

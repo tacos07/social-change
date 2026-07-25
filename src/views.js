@@ -134,7 +134,7 @@ export function successPage() {
   return layout(
     `
   <h1>Open Signal to join</h1>
-  <p class="sub">The link below hands you to the Signal app. Have it ready first, or there is nothing for it to open.</p>
+  <p class="sub">The link below opens the group in the Signal app. Get the app ready first and it takes you straight there.</p>
   <ol class="ready">
     <li>Install Signal, if you haven't</li>
     <li>Sign in on this device</li>
