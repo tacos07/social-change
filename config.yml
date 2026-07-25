@@ -6,8 +6,9 @@
 app_name: "Protium Group Access"
 
 # Public repo URL shown at the top of the site (transparency / audit).
-# Leave blank to hide the link.
-repo_url: "https://github.com/<your-user>/signal-join-gate"
+# Leave blank to hide the link. Blank on purpose: the repo is private, so a
+# link here would only lead visitors to a 404.
+repo_url: ""
 
 # Only these email domains may request access. Edit this list freely.
 # Just add lines under allowed_domains.
